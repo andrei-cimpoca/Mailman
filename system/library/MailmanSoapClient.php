@@ -1,9 +1,6 @@
 <?php
 class MailmanSoapClient{
 
-    const WSDL_TEST = 'http://mm.dev4.clientproof.co.uk/cws/?WSDL';
-    const WSDL_LIVE = 'http://mm.dev4.clientproof.co.uk/cws/?WSDL';
-
 	private $SOAPClient = null;
 
 	function __construct($wsdl, $username, $password, array $ClientOptions = array()){

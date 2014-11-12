@@ -29,17 +29,19 @@ class ControllerShippingMailman extends Controller
 		$this->data['text_disabled'] = $this->language->get('text_disabled');
 		$this->data['text_yes'] = $this->language->get('text_yes');
 		$this->data['text_no'] = $this->language->get('text_no');
+        $this->data['text_none'] = $this->language->get('text_none');
+        $this->data['text_labels'] = $this->language->get('text_labels');
 
         $this->data['entry_status'] = $this->language->get('entry_status');
-        $this->data['entry_test_mode'] = $this->language->get('entry_test_mode');
+        $this->data['entry_wsdl_url'] = $this->language->get('entry_wsdl_url');
         $this->data['entry_username'] = $this->language->get('entry_username');
         $this->data['entry_password'] = $this->language->get('entry_password');
         $this->data['entry_parcel'] = $this->language->get('entry_parcel');
-        $this->data['text_labels'] = $this->language->get('text_labels');
         $this->data['entry_plata_ramburs'] = $this->language->get('entry_plata_ramburs');
         $this->data['entry_fara_tva'] = $this->language->get('entry_fara_tva');
         $this->data['entry_payment0'] = $this->language->get('entry_payment0');
         $this->data['text_min_gratuit'] = $this->language->get('text_min_gratuit');
+        $this->data['entry_tax_class'] = $this->language->get('entry_tax_class');
 
         $this->data['entry_paymentrbdest'] = $this->language->get('entry_paymentrbdest');
 
@@ -51,6 +53,12 @@ class ControllerShippingMailman extends Controller
 			$this->data['error_warning'] = $this->error['warning'];
 		} else {
 			$this->data['error_warning'] = '';
+		}
+
+		if (isset($this->error['wsdl_url'])) {
+			$this->data['error_wsdl_url'] = $this->error['wsdl_url'];
+		} else {
+			$this->data['error_wsdl_url'] = '';
 		}
 
 		if (isset($this->error['username'])) {
@@ -107,10 +115,10 @@ class ControllerShippingMailman extends Controller
 			$this->data['mailman_status'] = $this->config->get('mailman_status');
 		}
 
-		if (isset($this->request->post['mailman_test_mode'])) {
-			$this->data['mailman_test_mode'] = $this->request->post['mailman_test_mode'];
+		if (isset($this->request->post['mailman_wsdl_url'])) {
+			$this->data['mailman_wsdl_url'] = $this->request->post['mailman_wsdl_url'];
 		} else {
-			$this->data['mailman_test_mode'] = $this->config->get('mailman_test_mode');
+			$this->data['mailman_wsdl_url'] = $this->config->get('mailman_wsdl_url');
 		}
 
 		if (isset($this->request->post['mailman_username'])) {
@@ -167,6 +175,15 @@ class ControllerShippingMailman extends Controller
 			$this->data['mailman_paymentrbdest'] = $this->config->get('mailman_paymentrbdest');
 		}
 
+        if (isset($this->request->post['mailman_tax_class_id'])) {
+            $this->data['mailman_tax_class_id'] = $this->request->post['mailman_tax_class_id'];
+        } else {
+            $this->data['mailman_tax_class_id'] = $this->config->get('mailman_tax_class_id');
+        }
+
+        $this->load->model('localisation/tax_class');
+        $this->data['tax_classes'] = $this->model_localisation_tax_class->getTaxClasses();
+
 		$this->template = 'shipping/mailman.tpl';
 		$this->children = array(
 			'common/header',
@@ -183,6 +200,10 @@ class ControllerShippingMailman extends Controller
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
+		if (!$this->request->post['mailman_wsdl_url']) {
+			$this->error['wsdl_url'] = $this->language->get('error_wsdl_url');
+		}
+
 		if (!$this->request->post['mailman_username']) {
 			$this->error['username'] = $this->language->get('error_username');
 		}
@@ -193,11 +214,10 @@ class ControllerShippingMailman extends Controller
 
         require_once(DIR_SYSTEM . 'library/MailmanSoapClient.php');
 
-        $test_mode = $this->request->post['mailman_test_mode'];
+        $wsdl_url = $this->request->post['mailman_wsdl_url'];
         $username = $this->request->post['mailman_username'];
         $password = $this->request->post['mailman_password'];
-        $wsdl = $test_mode ? MailmanSoapClient::WSDL_TEST : MailmanSoapClient::WSDL_LIVE;
-        $soap = new MailmanSoapClient($wsdl, $username, $password);
+        $soap = new MailmanSoapClient($wsdl_url, $username, $password);
         try {
             $soap->test();
         } catch (SoapFault $e) {

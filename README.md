@@ -5,8 +5,7 @@ Mailman Romania shipping module
 
 TODO
 ====
-test mode becomes endpoint textbox.
-tax class selector in admin with setting
+use tax class in estimate
 use ramburs, min free & other settings
 check for proper total
 need estimate cost api

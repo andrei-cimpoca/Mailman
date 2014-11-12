@@ -33,18 +33,13 @@
                 <span class="help"><b><?php echo $text_authentication; ?></b></span>
             </td>
           </tr>
-          <tr>
-              <td><span class="required">*</span> <?php echo $entry_test_mode; ?></td>
-              <td><select name="mailman_test_mode">
-                      <?php if ($mailman_test_mode) { ?>
-                          <option value="1" selected="selected"><?php echo $text_yes; ?></option>
-                          <option value="0"><?php echo $text_no; ?></option>
-                      <?php } else { ?>
-                          <option value="1"><?php echo $text_yes; ?></option>
-                          <option value="0" selected="selected"><?php echo $text_no; ?></option>
-                      <?php } ?>
-                  </select></td>
-          </tr>
+            <tr>
+                <td><span class="required">*</span> <?php echo $entry_wsdl_url; ?></td>
+                <td><input type="text" name="mailman_wsdl_url" value="<?php echo $mailman_wsdl_url; ?>" />
+                    <?php if ($error_wsdl_url) { ?>
+                        <span class="error"><?php echo $error_wsdl_url; ?></span>
+                    <?php } ?></td>
+            </tr>
           <tr>
             <td><span class="required">*</span> <?php echo $entry_username; ?></td>
             <td><input type="text" name="mailman_username" value="<?php echo $mailman_username; ?>" />
@@ -128,6 +123,19 @@
               <span class="error"><?php echo $error_min_gratuit; ?></span>
               <?php } ?></td>
           </tr>
+            <tr>
+                <td><?php echo $entry_tax_class; ?></td>
+                <td><select name="mailman_tax_class_id">
+                        <option value="0"><?php echo $text_none; ?></option>
+                        <?php foreach ($tax_classes as $tax_class) { ?>
+                            <?php if ($tax_class['tax_class_id'] == $mailman_tax_class_id) { ?>
+                                <option value="<?php echo $tax_class['tax_class_id']; ?>" selected="selected"><?php echo $tax_class['title']; ?></option>
+                            <?php } else { ?>
+                                <option value="<?php echo $tax_class['tax_class_id']; ?>"><?php echo $tax_class['title']; ?></option>
+                            <?php } ?>
+                        <?php } ?>
+                    </select></td>
+            </tr>
         </table>
       </form>
     </div>

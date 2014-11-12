@@ -15,11 +15,10 @@ class ModelShippingMailman extends Model {
 
         require_once(DIR_SYSTEM . 'library/MailmanSoapClient.php');
 
-        $test_mode = $this->config->get('mailman_test_mode');
+        $wsdl_url = $this->config->get('mailman_wsdl_url');
         $username = $this->config->get('mailman_username');
         $password = $this->config->get('mailman_password');
-        $wsdl = $test_mode ? MailmanSoapClient::WSDL_TEST : MailmanSoapClient::WSDL_LIVE;
-        $soap = new MailmanSoapClient($wsdl, $username, $password);
+        $soap = new MailmanSoapClient($wsdl_url, $username, $password);
 
 
         $expediere = new Expediere();
