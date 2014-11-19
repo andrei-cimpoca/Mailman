@@ -63,7 +63,7 @@
             <td><?php echo $entry_parcel; ?></td>
             <td><select name="mailman_parcel">
                 <?php if ($mailman_parcel) { ?>
-                <option value="1" selected="selected"></option>
+                <option value="1" selected="selected"><?php echo $text_yes; ?></option>
                 <option value="0"><?php echo $text_no; ?></option>
                 <?php } else { ?>
                 <option value="1"><?php echo $text_yes; ?></option>
