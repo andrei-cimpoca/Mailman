@@ -26,7 +26,7 @@ class ModelShippingMailman extends Model {
         $expediere->destinatar_departament = '';
         $postcode = '' !== $address['postcode'] ? str_pad($address['postcode'], 6, '0') : '';
         $expediere->detalii_destinatar_adresa = trim($address['address_1'] . ' ' . $address['address_2'] . ' ' . $postcode);
-        $expediere->detalii_destinatar_localitate = $address['city'];
+        $expediere->detalii_destinatar_localitate = $address['city'] ? $address['city'] : $address['zone'];
         $expediere->detalii_destinatar_judet = $address['zone'];
         $expediere->detalii_destinatar_telefon = isset($this->session->data['guest']['telephone']) ? $this->session->data['guest']['telephone'] : $this->customer->getTelephone();
 
@@ -46,19 +46,27 @@ class ModelShippingMailman extends Model {
         $expediere->valoare_declarata = $total;
         $expediere->ramburs = $this->config->get('mailman_plata_ramburs') ? $total : null;
 
-        //FIXME: query de commenturi/note
-        $expediere->note = '';
+        $expediere->note = isset($this->session->data['comment']) ? $this->session->data['comment'] : '';
+//
+//        print_r($this->session->data);
+//        print_r($expediere);
+//        print_r($this->cart);
+        print_r($address);
+        die;
 
-        $currency = 'RON';
+        //TODO: daca nu am city in $address, atunci e get quote. Altfel, generez AWB
 
+        $error = null;
         try {
-            $awb = $soap->saveAWB($expediere);
-            $error = null;
+            $this->session->data['mailman_awb'] = $soap->saveAWB($expediere);
+            $data = $soap->getAWB($this->session->data['mailman_awb']);
+
+            $currency = 'RON';
             $quote_data['mailman'] = array(
                 'code'         => 'mailman',
                 'title'        => 'Mailman',
                 'cost'         => $this->currency->convert($awb['price'], $currency, $this->config->get('config_currency')),
-                'tax_class_id' => 'mailman.tax',
+                'tax_class_id' => $this->config->get('mailman_tax_class_id'),
                 'text'         => $this->currency->format($this->tax->calculate($this->currency->convert($awb['price'], $currency, $this->currency->getCode()), $this->config->get('mailman_tax_class_id'), $this->config->get('config_tax')), $this->currency->getCode(), 1.0000000)
             );
         } catch (SoapFault $e) {
@@ -68,7 +76,7 @@ class ModelShippingMailman extends Model {
                 'code'         => 'mailman',
                 'title'        => 'Mailman',
                 'cost'         => null,
-                'tax_class_id' => 'mailman.tax',
+                'tax_class_id' => $this->config->get('mailman_tax_class_id'),
                 'text'         => null
             );
         }

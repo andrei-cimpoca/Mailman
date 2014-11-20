@@ -17,38 +17,12 @@ class MailmanSoapClient{
 
 	function __call($name, $arguments){
 		$k = md5($name . serialize($arguments));
-		if (!self::$cache[$k]){
-			if (isset($GLOBALS['debug'])){
-				var_dump('try', $name, $arguments);
-			}
+		if (!isset(self::$cache[$k])){
 			try{
 				self::$cache[$k] = $this->SOAPClient->__soapCall($name, $arguments, null);
-				if (isset($GLOBALS['debug'])){
-					var_dump('response', self::$cache[$k]);
-				}
 			}
 			catch (Exception $e){
-				if (isset($GLOBALS['debug'])){
-					var_dump('__getLastRequestHeaders()', $this->SOAPClient->__getLastRequestHeaders());
-					var_dump('__getLastRequest()', $this->SOAPClient->__getLastRequest());
-					var_dump('__getLastResponseHeaders()', $this->SOAPClient->__getLastResponseHeaders());
-					if (strpos($this->SOAPClient->__getLastResponse(), '<?xml') === 0){
-						var_dump('__getLastResponse', formatXML($this->SOAPClient->__getLastResponse()));
-						$doc = new DOMDocument();
-						$doc->loadXML($this->SOAPClient->__getLastResponse());
-						$xpath = new DOMXPath($doc);
-						var_dump($xpath->query('//faultstring')->item(0)->nodeValue);
-						echo "<code>", $xpath->query('//detail')->item(0)->nodeValue, "</code><br>\r\n";
-					}
-					else{
-						var_dump('__getLastResponse()', $this->SOAPClient->__getLastResponse());
-					}
-				}
 				throw $e;
-			}
-			if ($GLOBALS['debug'] > 1){
-				var_dump($this->SOAPClient->__getLastRequest());
-				var_dump(formatXML($this->SOAPClient->__getLastResponse()));
 			}
 		}
 
