@@ -15,12 +15,6 @@ class ModelShippingMailman extends Model {
 
         require_once(DIR_SYSTEM . 'library/MailmanSoapClient.php');
 
-        $wsdl_url = $this->config->get('mailman_wsdl_url');
-        $username = $this->config->get('mailman_username');
-        $password = $this->config->get('mailman_password');
-        $soap = new MailmanSoapClient($wsdl_url, $username, $password);
-
-
         $expediere = new Expediere();
         $expediere->destinatar_nume = $address['firstname'] . ' ' . $address['lastname'];
         $expediere->destinatar_departament = '';
@@ -58,6 +52,10 @@ class ModelShippingMailman extends Model {
 
         $error = null;
         try {
+            $wsdl_url = $this->config->get('mailman_wsdl_url');
+            $username = $this->config->get('mailman_username');
+            $password = $this->config->get('mailman_password');
+            $soap = new MailmanSoapClient($wsdl_url, $username, $password);
             $this->session->data['mailman_awb'] = $soap->saveAWB($expediere);
             $data = $soap->getAWB($this->session->data['mailman_awb']);
 
