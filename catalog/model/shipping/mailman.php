@@ -20,7 +20,8 @@ class ModelShippingMailman extends Model {
         $expediere->destinatar_departament = '';
         $postcode = '' !== $address['postcode'] ? str_pad($address['postcode'], 6, '0') : '';
         $expediere->detalii_destinatar_adresa = trim($address['address_1'] . ' ' . $address['address_2'] . ' ' . $postcode);
-        $expediere->detalii_destinatar_localitate = $address['city'] ? $address['city'] : $address['zone'];
+        $expediere->detalii_destinatar_localitate = $address['city'];
+//        $expediere->detalii_destinatar_localitate = $address['city'] ? $address['city'] : $address['zone'];
         $expediere->detalii_destinatar_judet = $address['zone'];
         $expediere->detalii_destinatar_telefon = isset($this->session->data['guest']['telephone']) ? $this->session->data['guest']['telephone'] : $this->customer->getTelephone();
 
@@ -41,14 +42,6 @@ class ModelShippingMailman extends Model {
         $expediere->ramburs = $this->config->get('mailman_plata_ramburs') ? $total : null;
 
         $expediere->note = isset($this->session->data['comment']) ? $this->session->data['comment'] : '';
-//
-//        print_r($this->session->data);
-//        print_r($expediere);
-//        print_r($this->cart);
-        print_r($address);
-        die;
-
-        //TODO: daca nu am city in $address, atunci e get quote. Altfel, generez AWB
 
         $error = null;
         try {
@@ -56,23 +49,22 @@ class ModelShippingMailman extends Model {
             $username = $this->config->get('mailman_username');
             $password = $this->config->get('mailman_password');
             $soap = new MailmanSoapClient($wsdl_url, $username, $password);
-            $this->session->data['mailman_awb'] = $soap->saveAWB($expediere);
-            $data = $soap->getAWB($this->session->data['mailman_awb']);
-
+            $estimate = $soap->estimateShipping($expediere);
             $currency = 'RON';
-            $quote_data['mailman'] = array(
-                'code'         => 'mailman',
-                'title'        => 'Mailman',
-                'cost'         => $this->currency->convert($awb['price'], $currency, $this->config->get('config_currency')),
+
+            $quote_data['standard'] = array(
+                'code'         => 'mailman.standard',
+                'title'        => 'Mailman shipping',
+                'cost'         => $this->currency->convert($estimate->cost, $currency, $this->config->get('config_currency')),
                 'tax_class_id' => $this->config->get('mailman_tax_class_id'),
-                'text'         => $this->currency->format($this->tax->calculate($this->currency->convert($awb['price'], $currency, $this->currency->getCode()), $this->config->get('mailman_tax_class_id'), $this->config->get('config_tax')), $this->currency->getCode(), 1.0000000)
+                'text'         => $this->currency->format($this->tax->calculate($this->currency->convert($estimate->cost, $currency, $this->currency->getCode()), $this->config->get('mailman_tax_class_id'), $this->config->get('config_tax')), $this->currency->getCode(), 1.0000000)
             );
         } catch (SoapFault $e) {
             $error = "Comanda nu a fost procesata.<br>Va rugam sa corectati datele de livrare conform mesajului de mai jos: <br><br>";
             $error .= '<br>' . $e->getMessage();
-            $quote_data['mailman'] = array(
-                'code'         => 'mailman',
-                'title'        => 'Mailman',
+            $quote_data['standard'] = array(
+                'code'         => 'mailman.standard',
+                'title'        => 'Mailman shipping',
                 'cost'         => null,
                 'tax_class_id' => $this->config->get('mailman_tax_class_id'),
                 'text'         => null
@@ -81,7 +73,7 @@ class ModelShippingMailman extends Model {
 
         return array(
                 'code'       => 'mailman',
-                'title'      => 'Mailman',
+                'title'      => 'Mailman shipping',
                 'quote'      => $quote_data,
                 'sort_order' => '1',
                 'error'      => $error
