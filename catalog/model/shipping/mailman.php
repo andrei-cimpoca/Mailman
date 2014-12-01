@@ -38,7 +38,7 @@ class ModelShippingMailman extends Model {
         $expediere->greutate = round((float)$this->cart->getWeight(), 0);
 
         $total = round((float)$this->cart->getTotal(), 2);
-        $expediere->valoare_declarata = $total;
+        $expediere->valoare_declarata = $this->config->get('mailman_asigurare_expeditie') ? $total : null;
         $expediere->ramburs = $this->config->get('mailman_plata_ramburs') ? $total : null;
 
         $expediere->note = isset($this->session->data['comment']) ? $this->session->data['comment'] : '';
@@ -51,13 +51,19 @@ class ModelShippingMailman extends Model {
             $soap = new MailmanSoapClient($wsdl_url, $username, $password);
             $estimate = $soap->estimateShipping($expediere);
             $currency = 'RON';
+            $cost = $estimate->cost;
+            $minGratuit = (float)$this->config->get('mailman_min_gratuit');
+            if($minGratuit >= 0.0 && $minGratuit <= $total) {
+                $cost = 0.0;
+            }
+            $cost = $this->tax->calculate($this->currency->convert($cost, $currency, $this->currency->getCode()), $this->config->get('mailman_tax_class_id'), $this->config->get('config_tax'));
 
             $quote_data['standard'] = array(
                 'code'         => 'mailman.standard',
                 'title'        => 'Mailman shipping',
-                'cost'         => $this->currency->convert($estimate->cost, $currency, $this->config->get('config_currency')),
+                'cost'         => $cost,
                 'tax_class_id' => $this->config->get('mailman_tax_class_id'),
-                'text'         => $this->currency->format($this->tax->calculate($this->currency->convert($estimate->cost, $currency, $this->currency->getCode()), $this->config->get('mailman_tax_class_id'), $this->config->get('config_tax')), $this->currency->getCode(), 1.0000000)
+                'text'         => $this->currency->format($cost, $this->currency->getCode(), 1.0000000)
             );
         } catch (SoapFault $e) {
             $error = "Comanda nu a fost procesata.<br>Va rugam sa corectati datele de livrare conform mesajului de mai jos: <br><br>";

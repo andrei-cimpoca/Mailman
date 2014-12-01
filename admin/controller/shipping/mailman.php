@@ -17,8 +17,8 @@ class ControllerShippingMailman extends Controller
 					
 			$this->session->data['success'] = $this->language->get('text_success');
 						
-//			$this->redirect($this->url->link('extension/shipping', 'token=' . $this->session->data['token'], 'SSL'));
-			$this->redirect($this->url->link('shipping/mailman', 'token=' . $this->session->data['token'], 'SSL'));
+			$this->redirect($this->url->link('extension/shipping', 'token=' . $this->session->data['token'], 'SSL'));
+//			$this->redirect($this->url->link('shipping/mailman', 'token=' . $this->session->data['token'], 'SSL'));
 		}
 		
 		$this->data['heading_title'] = $this->language->get('heading_title');
@@ -38,8 +38,7 @@ class ControllerShippingMailman extends Controller
         $this->data['entry_password'] = $this->language->get('entry_password');
         $this->data['entry_parcel'] = $this->language->get('entry_parcel');
         $this->data['entry_plata_ramburs'] = $this->language->get('entry_plata_ramburs');
-        $this->data['entry_fara_tva'] = $this->language->get('entry_fara_tva');
-        $this->data['entry_payment0'] = $this->language->get('entry_payment0');
+        $this->data['entry_asigurare_expeditie'] = $this->language->get('entry_asigurare_expeditie');
         $this->data['text_min_gratuit'] = $this->language->get('text_min_gratuit');
         $this->data['entry_tax_class'] = $this->language->get('entry_tax_class');
 
@@ -151,16 +150,10 @@ class ControllerShippingMailman extends Controller
 			$this->data['mailman_plata_ramburs'] = $this->config->get('mailman_plata_ramburs');
 		}
 
-		if (isset($this->request->post['mailman_fara_tva'])) {
-			$this->data['mailman_fara_tva'] = $this->request->post['mailman_fara_tva'];
+		if (isset($this->request->post['mailman_asigurare_expeditie'])) {
+			$this->data['mailman_asigurare_expeditie'] = $this->request->post['mailman_asigurare_expeditie'];
 		} else {
-			$this->data['mailman_fara_tva'] = $this->config->get('mailman_fara_tva');
-		}
-
-		if (isset($this->request->post['mailman_payment0'])) {
-			$this->data['mailman_payment0'] = $this->request->post['mailman_payment0'];
-		} else {
-			$this->data['mailman_payment0'] = $this->config->get('mailman_payment0');
+			$this->data['mailman_asigurare_expeditie'] = $this->config->get('mailman_asigurare_expeditie');
 		}
 
 		if (isset($this->request->post['mailman_min_gratuit'])) {

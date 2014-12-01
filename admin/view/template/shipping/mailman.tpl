@@ -93,21 +93,9 @@
               </select></td>
           </tr>
           <tr>
-            <td><?php echo $entry_fara_tva; ?></td>
-            <td><select name="mailman_fara_tva">
-                <?php if ($mailman_fara_tva) { ?>
-                <option value="1" selected="selected"><?php echo $text_yes; ?></option>
-                <option value="0"><?php echo $text_no; ?></option>
-                <?php } else { ?>
-                <option value="1"><?php echo $text_yes; ?></option>
-                <option value="0" selected="selected"><?php echo $text_no; ?></option>
-                <?php } ?>
-              </select></td>
-          </tr>
-          <tr>
-            <td><?php echo $entry_payment0; ?></td>
-            <td><select name="mailman_payment0">
-                <?php if ($mailman_payment0) { ?>
+            <td><?php echo $entry_asigurare_expeditie; ?></td>
+            <td><select name="mailman_asigurare_expeditie">
+                <?php if ($mailman_asigurare_expeditie) { ?>
                 <option value="1" selected="selected"><?php echo $text_yes; ?></option>
                 <option value="0"><?php echo $text_no; ?></option>
                 <?php } else { ?>
