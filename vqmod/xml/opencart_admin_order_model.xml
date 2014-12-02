@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+    <id>Dragonstar</id>
+    <version>1.0</version>
+    <vqmver>2.X</vqmver>
+    <author>Andrei Cimpoca</author>
+    <file name="admin/model/sale/order.php">
+        <operation info="model 1">
+            <search position="before"><![CDATA[
+			$reward = 0;
+            ]]></search>
+            <add><![CDATA[
+           $mailman_awb_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_mailman WHERE order_id = " . (int)$order_id);
+
+            ]]></add>
+        </operation>
+        <operation info="model 2">
+            <search position="after"><![CDATA[
+				'invoice_prefix'          => $order_query->row['invoice_prefix'],
+            ]]></search>
+            <add><![CDATA[
+                'mailman_awb_no'          => $mailman_awb_query->num_rows ? $mailman_awb_query->row['awb'] : null,
+            ]]></add>
+        </operation>
+        <operation info="model 3">
+            <search position="before"><![CDATA[
+	public function addOrderHistory($order_id, $data) {
+            ]]></search>
+            <add><![CDATA[
+	public function createMailmanAwbNo($order_id) {
+		$order_info = $this->getOrder($order_id);
+
+		if ($order_info && !$order_info['mailman_awb_no']) {
+            require_once(DIR_SYSTEM . 'library/MailmanSoapClient.php');
+
+            $expediere = new Expediere();
+            $expediere->destinatar_nume = $order_info['shipping_firstname'] . ' ' . $order_info['shipping_lastname'];
+            $expediere->destinatar_departament = '';
+            $postcode = '' !== $order_info['shipping_postcode'] ? str_pad($order_info['shipping_postcode'], 6, '0') : '';
+            $expediere->detalii_destinatar_adresa = trim($order_info['shipping_address_1'] . ' ' . $order_info['shipping_address_2'] . ' ' . $postcode);
+            $expediere->detalii_destinatar_localitate = $order_info['shipping_city'];
+            $expediere->detalii_destinatar_judet = $order_info['shipping_zone'];
+            $expediere->detalii_destinatar_telefon = $order_info['telephone'];
+
+            $this->load->model('catalog/product');
+            $descriere_expeditie = array();
+            $weight = 0;
+            $total = 0;
+            $products = $this->model_sale_order->getOrderProducts($this->request->get['order_id']);
+            foreach ($products as $product) {
+                $descriere_expeditie[] = $product["model"];
+                $det = $this->model_catalog_product->getProduct($product['product_id']);
+                $tmp = $this->weight->convert($det['weight'], $det['weight_class_id'], $this->config->get('config_weight_class_id'));
+                $weight += $tmp * $product['quantity'];
+                $total += $product['total'];
+            }
+            $expediere->descriere_expeditie = implode(', ', $descriere_expeditie);
+
+            $expediere->plic = $this->config->get('mailman_parcel') ? null : $this->config->get('mailman_labels');
+            $expediere->colet = $this->config->get('mailman_parcel') ? $this->config->get('mailman_labels') : null;
+            $expediere->greutate = round((float)$weight, 0);
+
+            $total = round((float)$total, 2);
+            $expediere->valoare_declarata = $this->config->get('mailman_asigurare_expeditie') ? $total : null;
+            $expediere->ramburs = $this->config->get('mailman_plata_ramburs') ? $total : null;
+
+            $expediere->note = $order_info['comment'];
+
+            $error = null;
+            try {
+                $wsdl_url = $this->config->get('mailman_wsdl_url');
+                $username = $this->config->get('mailman_username');
+                $password = $this->config->get('mailman_password');
+                $soap = new MailmanSoapClient($wsdl_url, $username, $password);
+                $awb = $soap->saveAWB($expediere);
+                $this->db->query("INSERT INTO `" . DB_PREFIX . "order_mailman` (order_id, awb) VALUES ('" . (int)$order_id . "', '" . $this->db->escape($awb) . "')");
+            } catch (SoapFault $e) {
+                $awb = null;
+            }
+
+			return $awb;
+		}
+	}
+
+            ]]></add>
+        </operation>
+    </file>
+</modification>

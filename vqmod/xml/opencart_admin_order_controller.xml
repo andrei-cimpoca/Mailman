@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+    <id>Dragonstar</id>
+    <version>1.0</version>
+    <vqmver>2.X</vqmver>
+    <author>Andrei Cimpoca</author>
+    <file name="admin/controller/sale/order.php">
+        <operation info="controller 1">
+            <search position="after"><![CDATA[
+			$this->language->load('sale/order');
+            ]]></search>
+            <add><![CDATA[
+
+            $this->data['shipping_code'] = $order_info['shipping_code'];
+            if(preg_match('#^mailman\.#', $order_info['shipping_code'])) {
+                $this->data['mailman'] = true;
+                $this->data['text_mailman_awb_no'] = $this->language->get('text_mailman_awb_no');
+                $this->data['mailman_awb_no'] = $order_info['mailman_awb_no'];
+            } else {
+                $this->data['mailman'] = false;
+            }
+            ]]></add>
+        </operation>
+        <operation info="controller 2">
+            <search position="before"><![CDATA[
+	public function createInvoiceNo() {
+            ]]></search>
+            <add><![CDATA[
+	public function createMailmanAwbNo() {
+		$this->language->load('sale/order');
+
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'sale/order')) {
+			$json['error'] = $this->language->get('error_permission');
+		} elseif (isset($this->request->get['order_id'])) {
+			$this->load->model('sale/order');
+
+			$mailman_awb_no = $this->model_sale_order->createMailmanAwbNo($this->request->get['order_id']);
+
+			if ($mailman_awb_no) {
+				$json['mailman_awb_no'] = $mailman_awb_no;
+			} else {
+				$json['error'] = $this->language->get('error_action');
+			}
+		}
+
+		$this->response->setOutput(json_encode($json));
+	}
+
+            ]]></add>
+        </operation>
+    </file>
+</modification>
