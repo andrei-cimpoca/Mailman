@@ -27,10 +27,10 @@
 	public function addOrderHistory($order_id, $data) {
             ]]></search>
             <add><![CDATA[
-	public function createMailmanAwbNo($order_id) {
-		$order_info = $this->getOrder($order_id);
+    public function createMailmanAwbNo($order_id) {
+        $order_info = $this->getOrder($order_id);
 
-		if ($order_info && !$order_info['mailman_awb_no']) {
+        if ($order_info && !$order_info['mailman_awb_no']) {
             require_once(DIR_SYSTEM . 'library/MailmanSoapClient.php');
 
             $expediere = new Expediere();
@@ -62,7 +62,7 @@
 
             $total = round((float)$total, 2);
             $expediere->valoare_declarata = $this->config->get('mailman_asigurare_expeditie') ? $total : null;
-            $expediere->ramburs = $this->config->get('mailman_plata_ramburs') ? $total : null;
+            $expediere->ramburs = $this->config->get('mailman_plata_ramburs') || 'cod' == $order_info['payment_code'] ? $total : null;
 
             $expediere->note = $order_info['comment'];
 
@@ -78,9 +78,9 @@
                 $awb = null;
             }
 
-			return $awb;
-		}
-	}
+            return $awb;
+        }
+    }
 
             ]]></add>
         </operation>

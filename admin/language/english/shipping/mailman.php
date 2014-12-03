@@ -13,7 +13,7 @@ $_['entry_wsdl_url']               = 'WSDL URL:';
 $_['entry_username']               = 'Cont utilizator:<span class="help">cont utilizator Mailman.</span>';
 $_['entry_password']               = 'Parola:<span class="help">parola cont Mailman.</span>';
 $_['entry_parcel']                 = 'Expediere colete:<span class="help">pentru plicuri, selectati nu.</span>';
-$_['entry_plata_ramburs']          = 'Plata AWB la destinatie:';
+$_['entry_plata_ramburs']          = 'Plata ramburs:<br /><span class="help">Metoda de plata <i>Cash On Delivery</i> implica plata ramburs, independent de setare</span>';
 $_['entry_asigurare_expeditie']    = 'Asigurare expeditie:';
 $_['entry_tax_class']              = 'Tax Class:';
 $_['text_min_gratuit']             = 'Suma minima transport gratuit:';
