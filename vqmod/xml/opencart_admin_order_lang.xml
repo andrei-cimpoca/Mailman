@@ -11,6 +11,7 @@ $_['text_invoice_date']                       = 'Invoice Date:';
             ]]></search>
             <add><![CDATA[
 $_['text_mailman_awb_no']                     = 'Mailman AWB No.:';
+$_['text_mailman_awb_download']               = 'Download AWB PDF';
             ]]></add>
         </operation>
     </file>

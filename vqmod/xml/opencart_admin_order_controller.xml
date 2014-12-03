@@ -7,7 +7,7 @@
     <file name="admin/controller/sale/order.php">
         <operation info="controller 1">
             <search position="after"><![CDATA[
-			$this->language->load('sale/order');
+			$this->data['tab_fraud'] = $this->language->get('tab_fraud');
             ]]></search>
             <add><![CDATA[
 
@@ -15,6 +15,7 @@
             if(preg_match('#^mailman\.#', $order_info['shipping_code'])) {
                 $this->data['mailman'] = true;
                 $this->data['text_mailman_awb_no'] = $this->language->get('text_mailman_awb_no');
+                $this->data['text_mailman_awb_download'] = $this->language->get('text_mailman_awb_download');
                 $this->data['mailman_awb_no'] = $order_info['mailman_awb_no'];
             } else {
                 $this->data['mailman'] = false;
@@ -26,27 +27,54 @@
 	public function createInvoiceNo() {
             ]]></search>
             <add><![CDATA[
-	public function createMailmanAwbNo() {
-		$this->language->load('sale/order');
+    public function createMailmanAwbNo() {
+        $this->language->load('sale/order');
 
-		$json = array();
+        $json = array();
 
-		if (!$this->user->hasPermission('modify', 'sale/order')) {
-			$json['error'] = $this->language->get('error_permission');
-		} elseif (isset($this->request->get['order_id'])) {
-			$this->load->model('sale/order');
+        if (!$this->user->hasPermission('modify', 'sale/order')) {
+            $json['error'] = $this->language->get('error_permission');
+        } elseif (isset($this->request->get['order_id'])) {
+            $this->load->model('sale/order');
 
-			$mailman_awb_no = $this->model_sale_order->createMailmanAwbNo($this->request->get['order_id']);
+            $mailman_awb_no = $this->model_sale_order->createMailmanAwbNo($this->request->get['order_id']);
 
-			if ($mailman_awb_no) {
-				$json['mailman_awb_no'] = $mailman_awb_no;
-			} else {
-				$json['error'] = $this->language->get('error_action');
-			}
-		}
+            if ($mailman_awb_no) {
+                $json['mailman_awb_no'] = $mailman_awb_no
+                    . ' ' . '<a target="_blank" href="'
+                    . $this->url->link('sale/order/downloadmailmanawb', 'awb=' . $mailman_awb_no . '&token=' . $this->session->data['token'], 'SSL')
+                    . '">' . $this->language->get('text_mailman_awb_download') . '</a>';
+            } else {
+                $json['error'] = $this->language->get('error_action');
+            }
+        }
 
-		$this->response->setOutput(json_encode($json));
-	}
+        $this->response->setOutput(json_encode($json));
+    }
+
+    public function downloadMailmanAwb() {
+        if (isset($this->request->get['awb'])) {
+
+            try {
+                $wsdl_url = $this->config->get('mailman_wsdl_url');
+                $username = $this->config->get('mailman_username');
+                $password = $this->config->get('mailman_password');
+                require_once(DIR_SYSTEM . 'library/MailmanSoapClient.php');
+                $soap = new MailmanSoapClient($wsdl_url, $username, $password);
+                $awb = json_encode($soap->getAWB($this->request->get['awb']));
+
+                $this->response->addHeader('Content-type: application/pdf');
+                $this->response->addHeader('Content-Disposition: attachment; filename="' . $this->request->get['awb'] . '.pdf"');
+                $this->response->setOutput($awb);
+            } catch (SoapFault $e) {
+                $this->response->addHeader('HTTP/1.1 404 Not Found');
+                $this->response->setOutput('HTTP/1.1 404 Not Found');
+            }
+        } else {
+            $this->response->addHeader('HTTP/1.1 400 Bad Request');
+            $this->response->setOutput('HTTP/1.1 400 Bad Request');
+        }
+    }
 
             ]]></add>
         </operation>
