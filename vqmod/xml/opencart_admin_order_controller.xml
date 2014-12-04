@@ -54,19 +54,19 @@
 
     public function downloadMailmanAwb() {
         if (isset($this->request->get['awb'])) {
-
             try {
                 $wsdl_url = $this->config->get('mailman_wsdl_url');
                 $username = $this->config->get('mailman_username');
                 $password = $this->config->get('mailman_password');
                 require_once(DIR_SYSTEM . 'library/MailmanSoapClient.php');
                 $soap = new MailmanSoapClient($wsdl_url, $username, $password);
-                $awb = json_encode($soap->getAWB($this->request->get['awb']));
+                $awb = base64_decode($soap->getAWBPDF($this->request->get['awb']));
 
                 $this->response->addHeader('Content-type: application/pdf');
                 $this->response->addHeader('Content-Disposition: attachment; filename="' . $this->request->get['awb'] . '.pdf"');
                 $this->response->setOutput($awb);
             } catch (SoapFault $e) {
+            var_dump($e);die;
                 $this->response->addHeader('HTTP/1.1 404 Not Found');
                 $this->response->setOutput('HTTP/1.1 404 Not Found');
             }
