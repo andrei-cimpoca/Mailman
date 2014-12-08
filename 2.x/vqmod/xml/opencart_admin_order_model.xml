@@ -24,7 +24,7 @@
         </operation>
         <operation info="model 3">
             <search position="before"><![CDATA[
-	public function addOrderHistory($order_id, $data) {
+	public function getTotalOrderHistories($order_id) {
             ]]></search>
             <add><![CDATA[
     public function createMailmanAwbNo($order_id) {
