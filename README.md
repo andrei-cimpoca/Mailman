@@ -9,4 +9,4 @@ https://github.com/vqmod/vqmod/wiki/Installing-vQmod-on-OpenCart
 
 TODO
 ====
-World peace
+Make 2.x version work

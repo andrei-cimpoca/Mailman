@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+    <id>Mailman</id>
+    <version>1.0</version>
+    <vqmver>2.X</vqmver>
+    <author>Andrei Cimpoca</author>
+    <file name="admin/view/template/sale/order_info.tpl">
+        <operation info="view 1">
+            <search position="before"><![CDATA[
+            <td><?php echo $text_store_name; ?></td>
+            ]]></search>
+            <add><![CDATA[
+          </tr>
+          <?php if($mailman): ?>
+          <tr>
+            <td><?php echo $text_mailman_awb_no; ?></td>
+            <td><?php if ($mailman_awb_no) { ?>
+              <?php echo $mailman_awb_no; ?>
+              <a target="_blank" href="index.php?route=sale/order/downloadmailmanawb&awb=<?php echo $mailman_awb_no; ?>&token=<?php echo $token; ?>">
+                <?php echo $text_mailman_awb_download; ?>
+              </a>
+              <?php } else { ?>
+              <span id="mailman_awb"><b>[</b> <a id="mailman_awb-generate"><?php echo $text_generate; ?></a> <b>]</b></span>
+              <?php } ?></td>
+          </tr>
+          <?php endif; ?>
+          <tr>
+            ]]></add>
+        </operation>
+        <operation info="view 2">
+            <search position="before"><![CDATA[
+$('#invoice-generate').live('click', function() {
+            ]]></search>
+            <add><![CDATA[
+$('#mailman_awb-generate').live('click', function() {
+	$.ajax({
+		url: 'index.php?route=sale/order/createmailmanawbno&token=<?php echo $token; ?>&order_id=<?php echo $order_id; ?>',
+		dataType: 'json',
+		beforeSend: function() {
+			$('#mailman_awb').after('<img src="view/image/loading.gif" class="loading" style="padding-left: 5px;" />');
+		},
+		complete: function() {
+			$('.loading').remove();
+		},
+		success: function(json) {
+			$('.success, .warning').remove();
+
+			if (json['error']) {
+				$('#tab-order').prepend('<div class="warning" style="display: none;">' + json['error'] + '</div>');
+
+				$('.warning').fadeIn('slow');
+			}
+
+			if (json.mailman_awb_no) {
+				$('#mailman_awb').fadeOut('slow', function() {
+					$('#mailman_awb').html(json['mailman_awb_no']);
+
+					$('#mailman_awb').fadeIn('slow');
+				});
+			}
+		}
+	});
+});
+
+            ]]></add>
+        </operation>
+    </file>
+</modification>

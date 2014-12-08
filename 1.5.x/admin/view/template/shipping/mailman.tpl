@@ -129,13 +129,4 @@
     </div>
   </div>
 </div>
-<script type="text/javascript"><!--
-$('select[name=\'ups_origin\']').bind('change', function() {
-	$('#service > div').hide();	
-										 
-	$('#' + this.value).show();	
-});
-
-$('select[name=\'ups_origin\']').trigger('change');
-//--></script> 
 <?php echo $footer; ?>
