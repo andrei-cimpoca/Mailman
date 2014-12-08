@@ -81,7 +81,7 @@ class ModelShippingMailman extends Model {
                 'code'       => 'mailman',
                 'title'      => 'Mailman shipping',
                 'quote'      => $quote_data,
-                'sort_order' => '1',
+                'sort_order' => (int)$this->config->get('mailman_sort_order'),
                 'error'      => $error
         );
 	}
